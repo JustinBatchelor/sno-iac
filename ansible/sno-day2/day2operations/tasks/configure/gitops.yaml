@@ -1,0 +1,19 @@
+---
+- name: Task to patch argocd resource resource to reencrypt tls
+  kubernetes.core.k8s:
+    api_version: argoproj.io/v1beta1
+    kind: ArgoCD
+    name: openshift-gitops
+    namespace: openshift-gitops
+    state: patched
+    merge_type:
+      - strategic-merge
+      - merge
+    definition:
+      spec:
+        server:
+          route:
+            enabled: true
+            tls:
+              insecureEdgeTerminationPolicy: Redirect
+              termination: reencrypt

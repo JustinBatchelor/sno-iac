@@ -1,0 +1,12 @@
+---
+- name: Task to configure openshift gitops operator
+  ansible.builtin.include_tasks: gitops.yaml
+
+- name: Task to configure vault-secrets operator
+  ansible.builtin.include_tasks: vaultsecrets.yaml
+
+- name: Task to configure cert-manager operator
+  ansible.builtin.include_tasks: certmanager.yaml
+
+- name: Task to configure lvm-storage operator
+  ansible.builtin.include_tasks: lvmstorage.yaml
