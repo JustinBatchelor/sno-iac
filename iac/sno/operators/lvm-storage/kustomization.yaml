@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
   # LVM-Storage Operator from gitops-catlog
   - github.com/JustinBatchelor/gitops-catalog//lvm-storage/operator/overlays/stable-4.16?ref=main
-  
+
+

@@ -1,0 +1,58 @@
+---
+- name: Check if OpenShift GitOps subscription exists
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: Subscription
+    namespace: openshift-operators
+    name: openshift-gitops-operator
+  register: subscription_info
+  failed_when: false
+
+- name: Check if OpenShift GitOps ClusterServiceVersion exists
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: ClusterServiceVersion
+    namespace: openshift-operators
+    label_selectors:
+      - 'operators.coreos.com/openshift-gitops-operator.openshift-operators='
+  register: csv_info
+  failed_when: false
+
+- name: Ensure the OpenShift GitOps Operator subscription is created
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: Subscription
+      metadata:
+        name: openshift-gitops-operator
+        namespace: openshift-operators
+      spec:
+        channel: latest
+        installPlanApproval: Automatic
+        name: openshift-gitops-operator
+        source: redhat-operators
+        sourceNamespace: openshift-marketplace
+  when: subscription_info.resources | length == 0
+
+- name: Include tasks that validate the operator is installed and 'Available'
+  ansible.builtin.include_tasks: validations/gitops.yaml
+
+# - name: Task to patch argocd resource resource to reencrypt tls
+#   kubernetes.core.k8s:
+#     api_version: argoproj.io/v1beta1
+#     kind: ArgoCD
+#     name: openshift-gitops
+#     namespace: openshift-gitops
+#     state: patched
+#     merge_type:
+#       - strategic-merge
+#       - merge
+#     definition:
+#       spec:
+#         server:
+#           route:
+#             enabled: true
+#             tls:
+#               insecureEdgeTerminationPolicy: Redirect
+#               termination: reencrypt

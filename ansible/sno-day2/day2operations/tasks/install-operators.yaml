@@ -1,0 +1,60 @@
+- name: Clone the GitOps Catalog repository
+  ansible.builtin.get_url:
+    repo: https://github.com/JustinBatchelor/gitops-catalog
+    dest: gitops-catalog
+    update: yes
+
+  
+# ## need to patch the operator
+# - name: Patch certmanagers.operator.openshift.io
+#   kubernetes.core.k8s:
+#     state: patched
+#     api_version: operator.openshift.io/v1alpha1
+#     kind: CertManager
+#     name: cluster
+#     namespace: cert-manager-operator
+#     merge_type: 
+#       - merge
+#     definition:
+#       spec:
+#         unsupportedConfigOverrides:
+#           controller:
+#             args: 
+#               - "--dns01-recursive-nameservers=1.1.1.1:53,8.8.8.8:53"
+#               - "--dns01-recursive-nameservers-only"
+
+
+# - name: Include task to validate operator installation
+#   ansible.builtin.include_tasks: validations/operators.yaml
+                    
+# - name: Task to set var template_certificate to true
+#   ansible.builtin.set_fact:
+#     template_certificate: true
+
+# - name: Task to template root argocd application with certificate
+#   ansible.builtin.template:
+#     src: 'templates/argocd-root-app.j2'
+#     dest: '{{ playbook_dir }}/oc-apply/argocd-root-app.yaml'
+#     mode: '0644'
+
+# - name: Task to apply root argocd application with certificate
+#   kubernetes.core.k8s:
+#     src: '{{ playbook_dir }}/oc-apply/argocd-root-app.yaml'
+#     state: present
+
+# - name: Include task to validate operator installation
+#   ansible.builtin.include_tasks: validations/operators.yaml
+
+# - name: Patch ingresscontroller.operator default
+#   kubernetes.core.k8s:
+#     state: patched
+#     api_version: operator.openshift.io/v1
+#     kind: IngressController
+#     name: default
+#     namespace: openshift-ingress-operator
+#     merge_type: 
+#       - merge
+#     definition:
+#       spec:
+#         defaultCertificate:
+#           name: "ingress-certificate-secret"

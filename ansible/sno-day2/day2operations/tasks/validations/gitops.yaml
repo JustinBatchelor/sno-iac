@@ -1,0 +1,62 @@
+- name: Wait for OpenShift GitOps Operator to be installed
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: ClusterServiceVersion
+    namespace: openshift-operators
+    label_selectors:
+      - 'operators.coreos.com/openshift-gitops-operator.openshift-operators='
+  register: csv_info
+  until: csv_info.resources | length > 0
+  retries: 10
+  delay: 30
+  when: subscription_info.resources | length == 0
+
+- name: Check status of OpenShift GitOps Operator
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: ClusterServiceVersion
+    namespace: openshift-operators
+    label_selectors:
+      - 'operators.coreos.com/openshift-gitops-operator.openshift-operators='
+  register: csv_status
+
+- name: Ensure the OpenShift GitOps Operator is running
+  ansible.builtin.fail:
+    msg: "OpenShift GitOps Operator installation failed."
+  when: csv_status.resources[0].status.phase != 'Succeeded'
+
+- name: Task to wait until the opertor is defined
+  kubernetes.core.k8s_info:
+    api_version: argoproj.io/v1alpha1
+    kind: ArgoCD
+    name: openshift-gitops
+    namespace: openshift-gitops
+  register: operator
+  until: 
+    - operator.resources[0] is defined
+  retries: 150
+  delay: 10
+
+- name: Task to wait until the opertor.status is defined
+  kubernetes.core.k8s_info:
+    api_version: argoproj.io/v1alpha1
+    kind: ArgoCD
+    name: openshift-gitops
+    namespace: openshift-gitops
+  register: operator
+  until: 
+    - operator.resources[0].status is defined
+  retries: 150
+  delay: 10
+
+- name: Task to wait until the opertor.status.phase is available
+  kubernetes.core.k8s_info:
+    api_version: argoproj.io/v1alpha1
+    kind: ArgoCD
+    name: openshift-gitops
+    namespace: openshift-gitops
+  register: operator
+  until: 
+    - operator.resources[0].status.phase == 'Available'
+  retries: 150
+  delay: 10

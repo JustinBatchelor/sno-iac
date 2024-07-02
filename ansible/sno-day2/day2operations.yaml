@@ -1,0 +1,8 @@
+- name: Ansible playbook to configure various day2 operations
+  hosts: localhost
+  vars_files:
+    - vars.yaml
+  tasks:
+    - name: Task to include the specific day2 operations
+      ansible.builtin.include_role:
+        name: day2operations
