@@ -8,3 +8,9 @@ cluster_domain: batchelor.live
 cluster_api: 'https://api.{{ cluster_name }}.{{ cluster_domain }}:6443'
 
 gitops_catalog: 'https://github.com/JustinBatchelor/gitops-catalog'
+
+operators_iac_repo:
+  url: 'https://github.com/JustinBatchelor/homelab'
+  path: 'iac/sno/config'
+  name: 'iac-operators-argocd'
+  namespace: 'openshift-gitops'

@@ -1,10 +1,31 @@
-- name: Clone the GitOps Catalog repository
-  ansible.builtin.get_url:
-    repo: https://github.com/JustinBatchelor/gitops-catalog
-    dest: gitops-catalog
-    update: yes
+- name: Ensure the OpenShift GitOps Operator subscription is created
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: '{{ operators_iac_repo["name"] }}'
+        namespace: '{{ operators_iac_repo["namespace"] }}'
+      spec:
+        project: default
+        source:
+          repoURL: '{{ operators_iac_repo["url"] }}'
+          targetRevision: HEAD
+          path: '{{ operators_iac_repo["path"] }}'
+        destination:
+          server: https://kubernetes.default.svc
+          namespace: default
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+          syncOptions:
+            - CreateNamespace=true
 
-  
+- name: Include task to validate operator installation
+  ansible.builtin.include_tasks: validations/operators.yaml
+
 # ## need to patch the operator
 # - name: Patch certmanagers.operator.openshift.io
 #   kubernetes.core.k8s:
@@ -24,8 +45,7 @@
 #               - "--dns01-recursive-nameservers-only"
 
 
-# - name: Include task to validate operator installation
-#   ansible.builtin.include_tasks: validations/operators.yaml
+
                     
 # - name: Task to set var template_certificate to true
 #   ansible.builtin.set_fact:

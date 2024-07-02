@@ -3,4 +3,3 @@ kind: Kustomization
 resources:
   # Cert-Manager
   - github.com/JustinBatchelor/gitops-catalog//openshift-cert-manager-operator/operator/overlays/stable-v1?ref=main
-  

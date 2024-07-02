@@ -3,65 +3,75 @@
   kubernetes.core.k8s_info:
     api_version: argoproj.io/v1alpha1
     kind: Application
-    name: argocd-operators
+    name: '{{ operators_iac_repo["name"] }}'
     namespace: openshift-gitops
   register: root_app
   until: root_app.resources is defined
   retries: 150
   delay: 10
 
-- debug:
-    msg: "{{ root_app.resources }}"
-
 - name: Task to wait until the root app resources[0] is defined
   kubernetes.core.k8s_info:
     api_version: argoproj.io/v1alpha1
     kind: Application
-    name: argocd-operators
+    name: '{{ operators_iac_repo["name"] }}'
     namespace: openshift-gitops
   register: root_app
   until: root_app.resources[0] is defined
   retries: 150
   delay: 10
 
-- debug:
-    msg: "{{ root_app.resources[0] }}"
-
 - name: Task to wait until the root app resources[0].status is defined
   kubernetes.core.k8s_info:
     api_version: argoproj.io/v1alpha1
     kind: Application
-    name: argocd-operators
+    name: '{{ operators_iac_repo["name"] }}'
     namespace: openshift-gitops
   register: root_app
   until: root_app.resources[0].status is defined
   retries: 150
   delay: 10
 
-- debug:
-    msg: "{{ root_app.resources[0].status }}"
-
 - name: Task to wait until the root app resources[0].status.sync is defined
   kubernetes.core.k8s_info:
     api_version: argoproj.io/v1alpha1
     kind: Application
-    name: argocd-operators
+    name: '{{ operators_iac_repo["name"] }}'
     namespace: openshift-gitops
   register: root_app
   until: root_app.resources[0].status.sync is defined
   retries: 150
   delay: 10
 
-- debug:
-    msg: "{{ root_app.resources[0].status.sync }}"
-
 - name: Task to wait until the root app resources[0].status.sync.status == 'Synced'
   kubernetes.core.k8s_info:
     api_version: argoproj.io/v1alpha1
     kind: Application
-    name: argocd-operators
+    name: '{{ operators_iac_repo["name"] }}'
     namespace: openshift-gitops
   register: root_app
   until: root_app.resources[0].status.sync.status == 'Synced'
+  retries: 150
+  delay: 10
+
+- name: Task to wait until the root app resources[0].status.sync.health is defined
+  kubernetes.core.k8s_info:
+    api_version: argoproj.io/v1alpha1
+    kind: Application
+    name: '{{ operators_iac_repo["name"] }}'
+    namespace: openshift-gitops
+  register: root_app
+  until: root_app.resources[0].status.sync.health is defined
+  retries: 150
+  delay: 10
+
+- name: Task to wait until the root app resources[0].status.sync.health.status == 'Healthy'
+  kubernetes.core.k8s_info:
+    api_version: argoproj.io/v1alpha1
+    kind: Application
+    name: '{{ operators_iac_repo["name"] }}'
+    namespace: openshift-gitops
+  register: root_app
+  until: root_app.resources[0].status.sync.health.status == 'Healthy'
   retries: 150
   delay: 10
