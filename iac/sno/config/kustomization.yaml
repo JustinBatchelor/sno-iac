@@ -6,4 +6,5 @@ resources:
   # install lvm-storage
   - ../operators/lvm-storage/
   # install vault-secrets
+  - ../operators/vault-secrets/
 
