@@ -1,0 +1,17 @@
+---
+# tasks file for install-cluster
+- name: Install openshift cluster
+  justinbatchelor.redhat_assisted_installer.cluster_actions:
+    cluster_id: '{{ cluster["cluster"][0]["id"] }}'
+    state: install
+  register: install_response
+
+- name: Task to wait until cluster status is in installed state
+  justinbatchelor.redhat_assisted_installer.cluster_info:
+    cluster_id: '{{ cluster["cluster"][0]["id"] }}'
+  register: cluster_info
+  until: 
+    - cluster_info["cluster_info"][0] is defined
+    - cluster_info["cluster_info"][0]["status"] == "installed"
+  retries: 150
+  delay: 30

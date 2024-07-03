@@ -4,3 +4,18 @@
 
 - name: Include proxmox tasks
   ansible.builtin.include_tasks: proxmox.yaml
+
+- name: Task to wait until cluster status is in ready state
+  justinbatchelor.redhat_assisted_installer.cluster_info:
+    cluster_id: '{{ cluster["cluster"][0]["id"] }}'
+  register: cluster_info
+  until: 
+    - cluster_info["cluster_info"][0] is defined
+    - cluster_info["cluster_info"][0]["status"] == "ready"
+  retries: 150
+  delay: 5
+
+- name: Task to fail if the cluster is not ready to install
+  ansible.builtin.fail:
+    msg: "Cluster is not ready to install."
+  when: cluster_info["cluster_info"][0]['status'] != 'ready'

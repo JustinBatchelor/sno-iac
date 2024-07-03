@@ -18,7 +18,7 @@
               insecureEdgeTerminationPolicy: Redirect
               termination: reencrypt
 
-- name: Patch certmanagers.operator.openshift.io
+- name: Patch certmanagers.operator.openshift.io to support dns validation
   kubernetes.core.k8s:
     state: patched
     api_version: operator.openshift.io/v1alpha1
