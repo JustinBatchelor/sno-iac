@@ -35,5 +35,3 @@
         sourceNamespace: openshift-marketplace
   when: subscription_info.resources | length == 0
 
-- name: Include tasks that validate the operator is installed and 'Available'
-  ansible.builtin.include_tasks: validations/gitops.yaml

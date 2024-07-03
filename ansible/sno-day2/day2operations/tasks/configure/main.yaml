@@ -1,12 +1,111 @@
 ---
-- name: Task to configure openshift gitops operator
-  ansible.builtin.include_tasks: gitops.yaml
+- name: Task to patch argocd resource resource to reencrypt tls
+  kubernetes.core.k8s:
+    api_version: argoproj.io/v1beta1
+    kind: ArgoCD
+    name: openshift-gitops
+    namespace: openshift-gitops
+    state: patched
+    merge_type:
+      - strategic-merge
+      - merge
+    definition:
+      spec:
+        server:
+          route:
+            enabled: true
+            tls:
+              insecureEdgeTerminationPolicy: Redirect
+              termination: reencrypt
 
-- name: Task to configure vault-secrets operator
-  ansible.builtin.include_tasks: vaultsecrets.yaml
+- name: Patch certmanagers.operator.openshift.io
+  kubernetes.core.k8s:
+    state: patched
+    api_version: operator.openshift.io/v1alpha1
+    kind: CertManager
+    name: cluster
+    namespace: cert-manager-operator
+    merge_type: 
+      - merge
+    definition:
+      spec:
+        unsupportedConfigOverrides:
+          controller:
+            args: 
+              - "--dns01-recursive-nameservers=1.1.1.1:53,8.8.8.8:53"
+              - "--dns01-recursive-nameservers-only"
 
-- name: Task to configure cert-manager operator
-  ansible.builtin.include_tasks: certmanager.yaml
 
-- name: Task to configure lvm-storage operator
-  ansible.builtin.include_tasks: lvmstorage.yaml
+- name: Ensure the OpenShift GitOps Operator subscription is created
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: '{{ operator_instance_repo["name"] }}'
+        namespace: '{{ operator_instance_repo["namespace"] }}'
+      spec:
+        project: default
+        source:
+          repoURL: '{{ operator_instance_repo["url"] }}'
+          targetRevision: HEAD
+          path: ./
+          helm:
+            parameters:
+              - name: clusterName
+                value: '{{ cluster_name }}'
+              - name: clusterDomain
+                value: '{{ cluster_domain }}'
+              - name: email
+                value: "justinrossbatchelor@gmail.com"
+              - name: certManager.enabled
+                value: "true"
+              - name: certManager.ingressCertificate.enabled
+                value: "true"
+              - name: vaultSecrets.enabled
+                value: "true"
+              - name: vaultSecrets.organizationID
+                value: "{{ lookup('env', 'organizationID') }}"
+              - name: vaultSecrets.projectID
+                value: "{{ lookup('env', 'projectID') }}"
+              - name: vaultSecrets.servicePrincipal.clientID
+                value: "{{ lookup('env', 'clientID') | b64encode }}"
+              - name: vaultSecrets.servicePrincipal.clientSecret
+                value: "{{ lookup('env', 'clientSecret') | b64encode }}"
+              - name: vaultSecrets.servicePrincipal.name
+                value: "hcp-service-principal"
+              - name: vaultsecrets.app.name
+                value: "homelab"
+              - name: vaultsecrets.app.key
+                value: "cloudflare_api_token"
+              - name: lvmstorage.enabled
+                value: "true"
+        destination:
+          server: https://kubernetes.default.svc
+          namespace: default
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+          syncOptions:
+            - CreateNamespace=true
+
+- name: Include tasks that validate the operator instance is installed and 'Available'
+  ansible.builtin.include_tasks: validations/gitops.yaml
+  vars:
+    instance_name: '{{ operator_instance_repo["name"] }}'
+
+- name: Patch ingresscontroller.operator default
+  kubernetes.core.k8s:
+    state: patched
+    api_version: operator.openshift.io/v1
+    kind: IngressController
+    name: default
+    namespace: openshift-ingress-operator
+    merge_type: 
+      - merge
+    definition:
+      spec:
+        defaultCertificate:
+          name: "ingress-certificate-secret"

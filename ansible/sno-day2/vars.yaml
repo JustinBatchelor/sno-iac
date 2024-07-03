@@ -14,3 +14,8 @@ operators_iac_repo:
   path: 'iac/sno/config'
   name: 'iac-operators-argocd'
   namespace: 'openshift-gitops'
+
+operator_instance_repo:
+  url: 'https://github.com/JustinBatchelor/openshift-operators'
+  name: 'iac-operator-instances-argocd'
+  namespace: 'openshift-gitops'

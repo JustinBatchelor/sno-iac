@@ -23,6 +23,8 @@
           syncOptions:
             - CreateNamespace=true
 
-- name: Include task to validate operator installation
-  ansible.builtin.include_tasks: validations/operators.yaml
+- name: Include tasks that validate the operator is installed and 'Available'
+  ansible.builtin.include_tasks: validations/gitops.yaml
+  vars:
+    instance_name: '{{ operators_iac_repo["name"] }}'
 
