@@ -1,0 +1,13 @@
+---
+- name: Ansible Playbook to automate deploying a sno cluster on your proxmox environment
+  hosts: localhost
+  vars_files:
+    - vars.yml
+  tasks:
+    - name: Include preflight-check role
+      ansible.builtin.include_role:
+        name: preflight-checks
+
+    # - name: Include install-cluster role
+    #   ansible.builtin.include_role:
+    #     name: install-cluster

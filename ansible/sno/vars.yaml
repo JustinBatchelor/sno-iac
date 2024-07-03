@@ -1,0 +1,91 @@
+# The openshift cluster's api
+cluster_api: 'https://api.{{ cluster_name }}.{{ cluster_domain }}:6443'
+
+gitops_catalog: 'https://github.com/JustinBatchelor/gitops-catalog'
+
+operators_iac_repo:
+  url: 'https://github.com/JustinBatchelor/homelab'
+  path: 'iac/sno/config'
+  name: 'iac-operators-argocd'
+  namespace: 'openshift-gitops'
+
+operator_instance_repo:
+  url: 'https://github.com/JustinBatchelor/openshift-operators'
+  name: 'iac-operator-instances-argocd'
+  namespace: 'openshift-gitops'
+
+
+# local user of the system.. used to set permissions when templating files
+local_user: jbatchel # <--- change this to your local user
+local_group: jbatchel # <--- change this to your local group
+
+# name of the vm that will be created to host the openshift cluster
+vmname: 'sno'
+# id of the vm that will be created to host the openshift cluster
+vmid: 500
+# domain name for the cluster
+base_dns_domain: 'batchelor.live'
+# represnets the name of the cluster as a subdomain of the base_dns_domain
+cluster_base_domain: '{{ vmname }}.{{ base_dns_domain }}' ##!! DO NOT MODIFY !!##
+
+# cluster_name configured to be the same as vmname in proxmox
+cluster_name: '{{ vmname }}' ##!! DO NOT MODIFY !!##
+
+# Availablity mode for clusters options are ["None", "Full"]
+cluster_high_availability_mode: 'None'
+
+# OpenShift version to deploy
+openshift_version: '4.16' ## FORMAT IS MAJOR.MINOR DO NOT INCLUDE PATCH
+# cpu architecture the cluster will use
+cpu_architecture: 'x86_64' 
+# path to ssh_public key to add to the cluster during creation 
+# this will allow you to debug nodes if they fail via ssh
+pub_ssh_key: '/home/{{ local_user }}/.ssh/id_rsa.pub'
+
+iso_file_name: "{{ vmname }}-installer.iso" ## DO NOT MODIFY
+
+resource_tags: "ocp,sno"
+
+storage_type: 'local-btrfs'
+
+# the number of minutes to wait for before starting validation checks while installing the cluster 
+# api tokens only last 15 mins and some assisted installer operations take longer than that to complete
+# mainly installing the cluster and joing hosts to the cluster
+minutes: 10
+
+# Storage for the cluster in Gigabytes
+storage_size_gb: 300
+
+# Resources for the singlenode openshift cluster
+cluster_resources:
+  scsihardware: 'virtio-scsi-single'
+  storage:
+    disk:
+      - name: scsi0
+        size: 300
+        format: '{{ storage_type }}:{{ storage_size_gb }}'
+      - name: scsi1
+        size: 500
+  memory:
+    size_mb: 38500
+  cpu:
+    type: 'q35'
+    chipset: 'host'
+    cores: 8
+  network:
+    format: 'virtio,bridge=vmbr0,firewall=1'
+  ide:
+    ide2: '{{ storage_type }}:iso/{{ vmname }}-installer.iso,media=cdrom'
+  ostype: 'l26'
+
+# Common resources for the proxmox host
+proxmox:
+  node: pve
+  api_user: 'root@pam'
+  api_host: 'pve.batchelor.live'
+  api_password: "{{ lookup('env', 'PROXMOX_PASSWORD') | default(None)}}"
+
+# Resources for the infra environment registration
+infrastructure_environment:
+  name: '{{ vmname }}-infra-env'
+  image_type: 'minimal-iso'

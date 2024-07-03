@@ -1,0 +1,6 @@
+---
+- name: Include tasks to register Single Node OpenShift cluster with assisted installer
+  ansible.builtin.include_tasks: generate-cluster.yaml
+
+- name: Include proxmox tasks
+  ansible.builtin.include_tasks: proxmox.yaml

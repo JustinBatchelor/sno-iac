@@ -35,7 +35,6 @@
               - "--dns01-recursive-nameservers=1.1.1.1:53,8.8.8.8:53"
               - "--dns01-recursive-nameservers-only"
 
-
 - name: Ensure the OpenShift GitOps Operator subscription is created
   kubernetes.core.k8s:
     state: present
@@ -56,7 +55,7 @@
               - name: clusterName
                 value: '{{ cluster_name }}'
               - name: clusterDomain
-                value: '{{ cluster_domain }}'
+                value: '{{ base_dns_domain }}'
               - name: email
                 value: "justinrossbatchelor@gmail.com"
               - name: certManager.enabled

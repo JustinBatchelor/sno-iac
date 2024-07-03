@@ -1,0 +1,76 @@
+---
+- name: Task to get vm information by vmid
+  community.general.proxmox_vm_info:
+    api_user: '{{ proxmox.api_user }}'
+    api_password: '{{ proxmox.api_password }}'
+    api_host: '{{ proxmox.api_host }}'
+    node: '{{ proxmox.node }}'
+    type: qemu
+    vmid: '{{ vmid }}'
+  register: vm_info
+  ignore_errors: true
+
+- name: Task to stop vm if it is running
+  community.general.proxmox_kvm:
+    api_user: '{{ proxmox.api_user }}'
+    api_password: '{{ proxmox.api_password }}'
+    api_host: '{{ proxmox.api_host }}'
+    name: '{{ vmname }}'
+    node: '{{ proxmox.node }}'
+    state: stopped
+    force: true
+  when:
+    - vm_info.proxmox_vms != []
+
+- name: Task to remove VM with vmid
+  community.general.proxmox_kvm:
+    api_user: '{{ proxmox.api_user }}'
+    api_password: '{{ proxmox.api_password }}'
+    api_host: '{{ proxmox.api_host }}'
+    name: '{{ vmname }}'
+    vmid: '{{ vmid }}'
+    node: '{{ proxmox.node }}'
+    state: absent
+
+- name: Task to ensure vm exists in proxmox
+  community.general.proxmox_kvm:
+    api_user: '{{ proxmox.api_user }}'
+    api_password: '{{ proxmox.api_password }}'
+    api_host: '{{ proxmox.api_host }}'
+    acpi: true
+    agent: 'enabled=1'
+    bios: ovmf
+    boot: 'order=scsi0;ide2;net0'
+    cpu: '{{ cluster_resources.cpu.chipset }}'
+    cores: '{{ cluster_resources.cpu.cores }}'
+    efidisk0:
+      efitype: "4m"
+      format: 'raw'
+      pre_enrolled_keys: false
+      storage: '{{ storage_type }}'
+    hotplug: 'disk,network,usb'
+    ide:
+      ide2: '{{ cluster_resources.ide.ide2 }}'
+    machine: '{{ cluster_resources.cpu.type }}'
+    memory: '{{ cluster_resources.memory.size_mb }}'
+    name: '{{ vmname }}'
+    net:
+      net0: '{{ cluster_resources.network.format }}'
+    node: '{{ proxmox.node }}'
+    onboot: true
+    ostype: '{{ cluster_resources.ostype }}'
+    scsihw: '{{ cluster_resources.scsihardware }}'
+    scsi:
+      scsi0: '{{ cluster_resources.storage.disk[0].format }}'
+    state: present
+    vmid: '{{ vmid }}'
+    tags: '{{ resource_tags }}'
+
+- name: Task to start vm
+  community.general.proxmox_kvm:
+    api_user: '{{ proxmox.api_user }}'
+    api_password: '{{ proxmox.api_password }}'
+    api_host: '{{ proxmox.api_host }}'
+    node: '{{ proxmox.node }}'
+    vmid: '{{ vmid }}'
+    state: started
