@@ -20,9 +20,9 @@ local_user: jbatchel # <--- change this to your local user
 local_group: jbatchel # <--- change this to your local group
 
 # name of the vm that will be created to host the openshift cluster
-vmname: 'ansible-testing'
+vmname: 'sno'
 # id of the vm that will be created to host the openshift cluster
-vmid: 600
+vmid: 500
 # domain name for the cluster
 base_dns_domain: 'batchelor.live'
 # represnets the name of the cluster as a subdomain of the base_dns_domain
@@ -48,10 +48,15 @@ resource_tags: "ocp,sno"
 
 storage_type: 'local-btrfs'
 
+ingress_vip: '10.45.45.6'
+api_vip: '10.45.45.6'
+
 # the number of minutes to wait for before starting validation checks while installing the cluster 
 # api tokens only last 15 mins and some assisted installer operations take longer than that to complete
 # mainly installing the cluster and joing hosts to the cluster
 minutes: 10
+
+mac_address: 'c6:90:ce:26:87:e0'
 
 # Storage for the cluster in Gigabytes
 storage_size_gb: 300
@@ -73,7 +78,7 @@ cluster_resources:
     chipset: 'host'
     cores: 8
   network:
-    format: 'virtio,bridge=vmbr0,firewall=1'
+    format: 'virtio={{ mac_address }},bridge=vmbr0,firewall=1'
   ide:
     ide2: '{{ storage_type }}:iso/{{ vmname }}-installer.iso,media=cdrom'
   ostype: 'l26'

@@ -23,6 +23,10 @@
           syncOptions:
             - CreateNamespace=true
 
+- name: Wait a few moments for the object to be created
+  ansible.builtin.pause:
+    seconds: 30
+
 - name: Include tasks that validate the operator is installed and 'Available'
   ansible.builtin.include_tasks: validations/gitops.yaml
   vars:

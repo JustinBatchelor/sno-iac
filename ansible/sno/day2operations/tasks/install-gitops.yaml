@@ -33,5 +33,14 @@
         name: openshift-gitops-operator
         source: redhat-operators
         sourceNamespace: openshift-marketplace
-  when: subscription_info.resources | length == 0
+  when: 
+  - subscription_info.resources is defined
+  - subscription_info.resources | length == 0
+
+
+- name: Wait a few moments for the object to be created
+  ansible.builtin.pause:
+    seconds: 30
+  
+
 

@@ -36,7 +36,7 @@
 
 - name: Set facts for the destination variable name
   ansible.builtin.set_fact:
-    iso_destination: "{{ tempdir_result['path'] }}/{{ iso_file_name }}"
+    iso_destination: '{{ tempdir_result["path"] }}/{{ iso_file_name }}'
 
 - name: Download url to iso path variable
   ansible.builtin.get_url:

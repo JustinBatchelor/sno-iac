@@ -74,9 +74,9 @@
                 value: "{{ lookup('env', 'clientSecret') | b64encode }}"
               - name: vaultSecrets.servicePrincipal.name
                 value: "hcp-service-principal"
-              - name: vaultsecrets.app.name
+              - name: vaultSecrets.app.name
                 value: "homelab"
-              - name: vaultsecrets.app.key
+              - name: vaultSecrets.app.key
                 value: "cloudflare_api_token"
               - name: lvmstorage.enabled
                 value: "true"
