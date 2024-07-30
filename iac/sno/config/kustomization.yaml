@@ -7,4 +7,5 @@ resources:
   - ../operators/lvm-storage/
   # install vault-secrets
   - ../operators/vault-secrets/
-
+  # install ansible-automation-platform
+  - ../operators/aap/
