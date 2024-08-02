@@ -80,6 +80,8 @@
                 value: "cloudflare_api_token"
               - name: lvmstorage.enabled
                 value: "true"
+              - name: aap.enabled
+                value: "true"
         destination:
           server: https://kubernetes.default.svc
           namespace: default
