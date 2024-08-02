@@ -1,11 +1,10 @@
 ---
 - name: Analysis
-  hosts: all
+  hosts: rhel
   strategy: free
   gather_facts: true
   become: true
   force_handlers: true
-
   vars:
     # By default the analysis role will use:
     # analysis_repos_el7: rhel-7-server-extras-rpms
@@ -19,4 +18,3 @@
     - name: Generate preupgrade analysis report
       ansible.builtin.import_role:
         name: infra.leapp.analysis
-...
