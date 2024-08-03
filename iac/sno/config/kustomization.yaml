@@ -9,3 +9,5 @@ resources:
   - ../operators/vault-secrets/
   # install ansible-automation-platform
   - ../operators/aap/
+  # install openshift-virtualization
+  - ../operators/ocp-virt/
