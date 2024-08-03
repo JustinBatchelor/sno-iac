@@ -10,4 +10,4 @@ resources:
   # install ansible-automation-platform
   - ../operators/aap/
   # install openshift-virtualization
-  # - ../operators/ocp-virt/
+  - ../operators/ocp-virt/
