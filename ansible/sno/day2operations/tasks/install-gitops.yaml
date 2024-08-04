@@ -34,13 +34,13 @@
         source: redhat-operators
         sourceNamespace: openshift-marketplace
   when: 
-  - subscription_info.resources is defined
-  - subscription_info.resources | length == 0
+    - subscription_info.resources is defined
+    - subscription_info.resources | length == 0
 
 
-- name: Wait a few moments for the object to be created
-  ansible.builtin.pause:
-    seconds: 30
+# - name: Wait a few moments for the object to be created
+#   ansible.builtin.pause:
+#     seconds: 30
   
 
 

@@ -72,11 +72,11 @@ cluster_resources:
       - name: scsi1
         size: 500
   memory:
-    size_mb: 38500
+    size_mb: 64000
   cpu:
     type: 'q35'
     chipset: 'host'
-    cores: 8
+    cores: 16
   network:
     format: 'virtio={{ mac_address }},bridge=vmbr0,firewall=1'
   ide:

@@ -82,6 +82,8 @@
                 value: "true"
               - name: aap.enabled
                 value: "true"
+              - name: ocpVirtualization.enabled
+                value: "true"
         destination:
           server: https://kubernetes.default.svc
           namespace: default
