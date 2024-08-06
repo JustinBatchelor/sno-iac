@@ -1,0 +1,86 @@
+---
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: open-webui
+  namespace: ollama
+spec:
+  serviceName: {{ .Values.open_web_ui.service_name }}
+  revisionHistoryLimit: 10
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  volumeClaimTemplates:
+    # - kind: PersistentVolumeClaim
+    #   apiVersion: v1
+    #   metadata:
+    #     name: ollama-data
+    #     creationTimestamp: null
+    #   spec:
+    #     accessModes:
+    #       - ReadWriteOnce
+    #     resources:
+    #       requests:
+    #         storage: 10Gi
+    #     volumeMode: Filesystem
+    - kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: open-webui-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        volumeMode: Filesystem
+  template:
+    spec:
+      containers:
+        - resources: {}
+          terminationMessagePath: /dev/termination-log
+          name: ollama-container
+          env:
+            - name: OLLAMA_BASE_URL
+              value: {{ .Values.ollama.route }}
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            # - name: ollama-data
+            #   mountPath: /root/.ollama
+            - name: open-webui-data
+              mountPath: /app/backend/data
+          terminationMessagePolicy: File
+          image: {{ .Values.open_webui.image }}
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+  podManagementPolicy: OrderedReady
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: ollama
+  namespace: ollama
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  host: ollama.apps.sno.batchelor.live
+  to:
+    kind: Service
+    name: {{ .Values.open_webui.service_name }}
+    weight: 100
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+  wildcardPolicy: None
