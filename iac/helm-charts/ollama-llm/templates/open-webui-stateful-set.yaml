@@ -5,7 +5,7 @@ metadata:
   name: open-webui
   namespace: ollama
 spec:
-  serviceName: {{ .Values.open_web_ui.service_name }}
+  serviceName: {{ .Values.open_webui.service_name }}
   revisionHistoryLimit: 10
   persistentVolumeClaimRetentionPolicy:
     whenDeleted: Retain
