@@ -12,25 +12,11 @@
 #   storageClassName: lvms-vg1
 #   volumeMode: Filesystem
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: ollama-storage
-  namespace: ollama
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi # Change this to your desired storage size
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ollama-models
   namespace: ollama
-  annotations:
-    argocd.argoproj.io/sync-wave: "5"
 spec:
   replicas: 1
   selector:
@@ -65,6 +51,20 @@ spec:
             claimName: ollama-storage
   strategy:
     type: Recreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-storage
+  namespace: ollama
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi # Change this to your desired storage size
 ---
 kind: Service
 apiVersion: v1

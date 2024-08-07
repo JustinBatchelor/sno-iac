@@ -12,26 +12,11 @@
 #   storageClassName: lvms-vg1
 #   volumeMode: Filesystem
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: open-webui-data
-  namespace: ollama
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
-  volumeMode: Filesystem
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: open-webui
   namespace: ollama
-  annotations:
-    argocd.argoproj.io/sync-wave: "5"
 spec:
   replicas: 1
   selector:
@@ -72,6 +57,21 @@ spec:
     rollingUpdate:
       maxUnavailable: 1
       maxSurge: 1
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: open-webui-data
+  namespace: ollama
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  volumeMode: Filesystem
 ---
 apiVersion: v1
 kind: Service
