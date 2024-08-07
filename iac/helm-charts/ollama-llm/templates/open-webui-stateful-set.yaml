@@ -94,7 +94,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "5"
 spec:
-  host: ollama.apps.sno.batchelor.live/
+  host: ollama
   to:
     kind: Service
     name: open-webui

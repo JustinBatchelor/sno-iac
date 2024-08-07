@@ -65,7 +65,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "5"
 spec:
-  host: https://ollama-models.apps.sno.batchelor.live
+  host: ollama-models
   to:
     kind: Service
     name: ollama-models
