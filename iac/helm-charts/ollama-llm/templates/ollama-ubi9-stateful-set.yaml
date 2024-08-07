@@ -74,7 +74,8 @@ spec:
     - metadata:
         name: ollama-storage
       spec:
-        accessModes: [ "ReadWriteOnce" ]
+        accessModes:
+          - "ReadWriteOnce"
         resources:
           requests:
             storage: 10Gi # Change this to your desired storage size
