@@ -88,6 +88,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "5"
 spec:
+  selector:
+    app: ollama-models
   ipFamilies:
     - IPv4
   ports:
