@@ -41,6 +41,7 @@ spec:
     metadata:
       labels:
         app: open-webui
+    spec:
       containers:
         - resources: {}
           terminationMessagePath: /dev/termination-log
