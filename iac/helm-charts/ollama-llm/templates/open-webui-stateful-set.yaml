@@ -83,7 +83,7 @@ spec:
   # host: https://ollama.apps.sno.batchelor.live
   to:
     kind: Service
-    name: {{ .Values.open_webui.service_name }}
+    name: ollama-models
     weight: 100
   port:
     targetPort: 8080
