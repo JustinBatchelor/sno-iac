@@ -1,6 +1,43 @@
 ---
-kind: Deployment
+# kind: Deployment
+# apiVersion: apps/v1
+# metadata:
+#   name: ollama-models
+#   namespace: ollama
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: ollama-models
+#   template:
+#     metadata:
+#       labels:
+#         app: ollama-models
+#     spec:
+#       containers:
+#         - name: ollama-models
+#           image: {{ .Values.ollama.image }}
+#           ports:
+#             - containerPort: 11434
+#               protocol: TCP
+#           resources: {}
+#           terminationMessagePath: /dev/termination-log
+#           terminationMessagePolicy: File
+#           imagePullPolicy: IfNotPresent
+#       restartPolicy: Always
+#       terminationGracePeriodSeconds: 30
+#       dnsPolicy: ClusterFirst
+#       securityContext: {}
+#       schedulerName: default-scheduler
+#   strategy:
+#     type: RollingUpdate
+#     rollingUpdate:
+#       maxUnavailable: 25%
+#       maxSurge: 25%
+#   revisionHistoryLimit: 10
+#   progressDeadlineSeconds: 600
 apiVersion: apps/v1
+kind: StatefulSet
 metadata:
   name: ollama-models
   namespace: ollama
@@ -9,6 +46,7 @@ spec:
   selector:
     matchLabels:
       app: ollama-models
+  serviceName: "ollama-models"
   template:
     metadata:
       labels:
@@ -20,6 +58,9 @@ spec:
           ports:
             - containerPort: 11434
               protocol: TCP
+          volumeMounts:
+            - name: ollama-storage
+              mountPath: /root/.ollama
           resources: {}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
@@ -29,13 +70,14 @@ spec:
       dnsPolicy: ClusterFirst
       securityContext: {}
       schedulerName: default-scheduler
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 25%
-      maxSurge: 25%
-  revisionHistoryLimit: 10
-  progressDeadlineSeconds: 600
+  volumeClaimTemplates:
+    - metadata:
+        name: ollama-storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Gi # Change this to your desired storage size
 ---
 kind: Service
 apiVersion: v1

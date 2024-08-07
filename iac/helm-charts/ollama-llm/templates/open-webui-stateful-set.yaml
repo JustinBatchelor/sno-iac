@@ -54,8 +54,6 @@ spec:
               protocol: TCP
           imagePullPolicy: IfNotPresent
           volumeMounts:
-            # - name: ollama-data
-            #   mountPath: /root/.ollama
             - name: open-webui-data
               mountPath: /app/backend/data
           terminationMessagePolicy: File
