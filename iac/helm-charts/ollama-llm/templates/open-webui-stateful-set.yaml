@@ -34,8 +34,13 @@ spec:
           requests:
             storage: 10Gi
         volumeMode: Filesystem
+  selector:
+    matchLabels:
+      app: open-webui
   template:
-    spec:
+    metadata:
+      labels:
+        app: open-webui
       containers:
         - resources: {}
           terminationMessagePath: /dev/termination-log
