@@ -72,21 +72,35 @@ spec:
     rollingUpdate:
       partition: 0
 ---
-# kind: Route
-# apiVersion: route.openshift.io/v1
-# metadata:
-#   name: ollama
-#   namespace: ollama
-#   annotations:
-#     argocd.argoproj.io/sync-wave: "5"
-# spec:
-#   # host: https://ollama.apps.sno.batchelor.live
-#   to:
-#     kind: Service
-#     name: ollama-models
-#     weight: 100
-#   port:
-#     targetPort: 8080
-#   tls:
-#     termination: edge
-#   wildcardPolicy: None
+apiVersion: v1
+kind: Service
+metadata:
+  name: open-webui
+  namespace: ollama
+spec:
+  selector:
+    app: open-webui
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 8080
+  type: ClusterIP
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: ollama
+  namespace: ollama
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  host: ollama.apps.sno.batchelor.live/
+  to:
+    kind: Service
+    name: open-webui
+    weight: 100
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+  wildcardPolicy: None
