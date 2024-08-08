@@ -81,8 +81,8 @@ spec:
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           imagePullPolicy: IfNotPresent
-          command: ["/bin/sh"]
-          args: ["-c", "ollama run phi3 && sleep 30 && ollama run phi3"]
+          command: ["/usr/bin/ollama"]
+          args: ["run phi3 && sleep 30 && ollama run phi3"]
           readinessProbe:
             exec:
               command:
