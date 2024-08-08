@@ -60,6 +60,7 @@ spec:
       initContainers:
         - name: init-ollama
           image: {{ .Values.ollama.image }}
+          command: ["/bin/sh", "-c", "until ollama --version; do echo 'Waiting for ollama...'; sleep 2; done"]
           volumeMounts:
             - name: ollama-storage
               mountPath: /root/.ollama
