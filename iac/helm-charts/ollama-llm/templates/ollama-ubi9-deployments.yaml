@@ -20,6 +20,10 @@ spec:
           ports:
             - containerPort: 11434
               protocol: TCP
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "ollama run phi3"]
           volumeMounts:
             - name: ollama-storage
               mountPath: /root/.ollama
