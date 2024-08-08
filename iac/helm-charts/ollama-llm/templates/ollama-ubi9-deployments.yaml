@@ -83,16 +83,6 @@ spec:
           imagePullPolicy: IfNotPresent
           command: ["/usr/bin/ollama"]
           args: ["run phi3 && sleep 30 && ollama run phi3"]
-          readinessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - |
-                  # Check if the ollama service is running properly
-                  nc -zv localhost 11434
-            initialDelaySeconds: 10
-            periodSeconds: 5
       volumes:
         - name: ollama-storage
           persistentVolumeClaim:
