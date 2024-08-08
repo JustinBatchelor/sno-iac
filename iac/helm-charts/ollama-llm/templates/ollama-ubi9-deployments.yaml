@@ -28,7 +28,7 @@ spec:
           terminationMessagePolicy: File
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh"]
-          args: ["-c", "do sleep 5; ollama run phi3;"]
+          args: ["-c", "sleep 5; ollama run phi3;"]
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
