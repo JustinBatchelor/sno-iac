@@ -1,9 +1,61 @@
 ---
-apiVersion: apps/v1
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: ollama-models
+#   namespace: ollama
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: ollama-models
+#   template:
+#     metadata:
+#       labels:
+#         app: ollama-models
+#     spec:
+#       containers:
+#         - name: ollama-models
+#           image: {{ .Values.ollama.image }}
+#           ports:
+#             - containerPort: 11434
+#               protocol: TCP
+#           volumeMounts:
+#             - name: ollama-storage
+#               mountPath: /root/.ollama
+#           resources: {}
+#           terminationMessagePath: /dev/termination-log
+#           terminationMessagePolicy: File
+#           imagePullPolicy: IfNotPresent
+#           readinessProbe:
+#             exec:
+#               command:
+#                 - /bin/sh
+#                 - -c
+#                 - |
+#                   # wait until ollama is installed
+#                   ollama --version
+#       restartPolicy: Always
+#       terminationGracePeriodSeconds: 30
+#       dnsPolicy: ClusterFirst
+#       securityContext: {}
+#       schedulerName: default-scheduler
+#       volumes:
+#         - name: ollama-storage
+#           persistentVolumeClaim:
+#             claimName: ollama-storage
+#   strategy:
+#     type: Recreate
+
 kind: Deployment
+apiVersion: apps/v1
 metadata:
   name: ollama-models
   namespace: ollama
+  annotations:
+    deployment.kubernetes.io/revision: '1'
+  labels:
+    app.kubernetes.io/instance: ollama-open-webui
 spec:
   replicas: 1
   selector:
@@ -14,38 +66,58 @@ spec:
       labels:
         app: ollama-models
     spec:
-      containers:
-        - name: ollama-models
-          image: {{ .Values.ollama.image }}
-          ports:
-            - containerPort: 11434
-              protocol: TCP
+      initContainers:
+        - name: install-ollama
+          image: 'quay.io/rh-aiservices-bu/ollama-ubi9@sha256:900a74cb65f26d074ba1d18cc150a69007a3893597141622a9770d0c79ec5e22'
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              # Add installation commands for ollama package here
+              echo "Installing ollama package"
+              # Simulate installation
+              sleep 30
+              echo "Installation completed"
           volumeMounts:
             - name: ollama-storage
               mountPath: /root/.ollama
+      containers:
+        - name: ollama-models
+          image: 'quay.io/rh-aiservices-bu/ollama-ubi9@sha256:900a74cb65f26d074ba1d18cc150a69007a3893597141622a9770d0c79ec5e22'
+          ports:
+            - containerPort: 11434
+              protocol: TCP
           resources: {}
+          volumeMounts:
+            - name: ollama-storage
+              mountPath: /root/.ollama
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           imagePullPolicy: IfNotPresent
+          command: ["/bin/sh"]
+          args: ["-c", "ollama run phi3 && sleep 30 && ollama run phi3"]
           readinessProbe:
             exec:
               command:
                 - /bin/sh
                 - -c
                 - |
-                  # wait until ollama is installed
-                  ollama --version
+                  # Check if the ollama service is running properly
+                  nc -zv localhost 11434
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: ollama-storage
+          persistentVolumeClaim:
+            claimName: ollama-storage
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
       securityContext: {}
       schedulerName: default-scheduler
-      volumes:
-        - name: ollama-storage
-          persistentVolumeClaim:
-            claimName: ollama-storage
   strategy:
     type: Recreate
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
