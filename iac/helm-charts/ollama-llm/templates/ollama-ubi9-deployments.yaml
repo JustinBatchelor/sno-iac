@@ -69,14 +69,6 @@ spec:
       initContainers:
         - name: install-ollama
           image: 'quay.io/rh-aiservices-bu/ollama-ubi9@sha256:900a74cb65f26d074ba1d18cc150a69007a3893597141622a9770d0c79ec5e22'
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              # Add installation commands for ollama package here
-              echo "Installing ollama package"
-              # Simulate installation
-              sleep 30
-              echo "Installation completed"
           volumeMounts:
             - name: ollama-storage
               mountPath: /root/.ollama
