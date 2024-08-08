@@ -1,4 +1,47 @@
 ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: ollama-models
+#   namespace: ollama
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: ollama-models
+#   template:
+#     metadata:
+#       labels:
+#         app: ollama-models
+#     spec:
+#       containers:
+#         - name: ollama-models
+#           image: {{ .Values.ollama.image }}
+#           ports:
+#             - containerPort: 11434
+#               protocol: TCP
+#           lifecycle:
+#             postStart:
+#               exec:
+#                 command: ["/bin/sh", "-c", "ollama run phi3"]
+#           volumeMounts:
+#             - name: ollama-storage
+#               mountPath: /root/.ollama
+#           resources: {}
+#           terminationMessagePath: /dev/termination-log
+#           terminationMessagePolicy: File
+#           imagePullPolicy: IfNotPresent
+#       restartPolicy: Always
+#       terminationGracePeriodSeconds: 30
+#       dnsPolicy: ClusterFirst
+#       securityContext: {}
+#       schedulerName: default-scheduler
+#       volumes:
+#         - name: ollama-storage
+#           persistentVolumeClaim:
+#             claimName: ollama-storage
+#   strategy:
+#     type: Recreate
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,6 +57,10 @@ spec:
       labels:
         app: ollama-models
     spec:
+      initContainers:
+        - name: init-ollama
+          image: {{ .Values.ollama.image }}
+          command: ["/bin/sh", "-c", "until ollama --version; do echo 'Waiting for ollama...'; sleep 2; done"]
       containers:
         - name: ollama-models
           image: {{ .Values.ollama.image }}
