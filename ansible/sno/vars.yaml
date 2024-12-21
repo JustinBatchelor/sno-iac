@@ -35,12 +35,12 @@ cluster_name: '{{ vmname }}' ##!! DO NOT MODIFY !!##
 cluster_high_availability_mode: 'None'
 
 # OpenShift version to deploy
-openshift_version: '4.16' ## FORMAT IS MAJOR.MINOR DO NOT INCLUDE PATCH
+openshift_version: '4.17' ## FORMAT IS MAJOR.MINOR DO NOT INCLUDE PATCH
 # cpu architecture the cluster will use
 cpu_architecture: 'x86_64' 
 # path to ssh_public key to add to the cluster during creation 
 # this will allow you to debug nodes if they fail via ssh
-pub_ssh_key: '/home/{{ local_user }}/.ssh/id_rsa.pub'
+pub_ssh_key: '/home/{{ local_user }}/.ssh/ocp_rsa.pub'
 
 iso_file_name: "{{ vmname }}-installer.iso" ## DO NOT MODIFY
 
