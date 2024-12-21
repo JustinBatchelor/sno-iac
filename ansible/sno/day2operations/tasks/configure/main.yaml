@@ -1,22 +1,22 @@
 ---
-- name: Task to patch argocd resource resource to reencrypt tls
-  kubernetes.core.k8s:
-    api_version: argoproj.io/v1beta1
-    kind: ArgoCD
-    name: openshift-gitops
-    namespace: openshift-gitops
-    state: patched
-    merge_type:
-      - strategic-merge
-      - merge
-    definition:
-      spec:
-        server:
-          route:
-            enabled: true
-            tls:
-              insecureEdgeTerminationPolicy: Redirect
-              termination: reencrypt
+# - name: Task to patch argocd resource resource to reencrypt tls
+#   kubernetes.core.k8s:
+#     api_version: argoproj.io/v1beta1
+#     kind: ArgoCD
+#     name: openshift-gitops
+#     namespace: openshift-gitops
+#     state: patched
+#     merge_type:
+#       - strategic-merge
+#       - merge
+#     definition:
+#       spec:
+#         server:
+#           route:
+#             enabled: true
+#             tls:
+#               insecureEdgeTerminationPolicy: Redirect
+#               termination: reencrypt
 
 - name: Patch certmanagers.operator.openshift.io to support dns validation
   kubernetes.core.k8s:
@@ -35,7 +35,7 @@
               - "--dns01-recursive-nameservers=1.1.1.1:53,8.8.8.8:53"
               - "--dns01-recursive-nameservers-only"
 
-- name: Ensure the OpenShift GitOps Operator subscription is created
+- name: Ensure the OpenShift GitOps Operator Instance ArgoCD Application exists
   kubernetes.core.k8s:
     state: present
     definition:
@@ -83,7 +83,7 @@
               - name: aap.enabled
                 value: "true"
               - name: ocpVirtualization.enabled
-                value: "true"
+                value: "false"
         destination:
           server: https://kubernetes.default.svc
           namespace: default
@@ -94,10 +94,32 @@
           syncOptions:
             - CreateNamespace=true
 
-- name: Include tasks that validate the operator instance is installed and 'Available'
-  ansible.builtin.include_tasks: validations/gitops.yaml
-  vars:
-    instance_name: '{{ operator_instance_repo["name"] }}'
+- name: Wait for Operator Instance ArgoCD Application to exist
+  kubernetes.core.k8s_info:
+    api_version: argoproj.io/v1alpha1
+    kind: Application
+    name: '{{ operator_instance_repo["name"] }}'
+    namespace: '{{ operator_instance_repo["namespace"] }}'
+  register: argocd_operator_instance_object
+  retries: 30
+  delay: 10
+  until: argocd_operator_instance_object.resources | length > 0
+
+- debug:
+    msg: "{{ argocd_operator_instance_object.resources[0].status.health }}"
+
+- name: Wait until Operator Instance ArgoCD Application status.health.status is 'Healthy'
+  kubernetes.core.k8s_info:
+    api_version: argoproj.io/v1alpha1
+    kind: Application
+    name: '{{ operator_instance_repo["name"] }}'
+    namespace: '{{ operator_instance_repo["namespace"] }}'
+  register: argocd_operator_instance
+  retries: 30
+  delay: 10
+  until: 
+    - argocd_operator_instance.resources[0].status.health.status is defined 
+    - argocd_operator_instance.resources[0].status.health.status == 'Healthy'
 
 - name: Patch ingresscontroller.operator default
   kubernetes.core.k8s:

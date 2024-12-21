@@ -1,24 +1,14 @@
 ---
-- name: Check if OpenShift GitOps subscription exists
-  kubernetes.core.k8s_info:
-    api_version: operators.coreos.com/v1alpha1
-    kind: Subscription
-    namespace: openshift-operators
-    name: openshift-gitops-operator
-  register: subscription_info
-  failed_when: false
+- name: Ensure the 'openshift-gitops' Namespace exists
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: openshift-gitops-operator
 
-- name: Check if OpenShift GitOps ClusterServiceVersion exists
-  kubernetes.core.k8s_info:
-    api_version: operators.coreos.com/v1alpha1
-    kind: ClusterServiceVersion
-    namespace: openshift-operators
-    label_selectors:
-      - 'operators.coreos.com/openshift-gitops-operator.openshift-operators='
-  register: csv_info
-  failed_when: false
-
-- name: Ensure the OpenShift GitOps Operator subscription is created
+- name: Ensure the OpenShift GitOps Operator subscription exists
   kubernetes.core.k8s:
     state: present
     definition:
@@ -33,14 +23,29 @@
         name: openshift-gitops-operator
         source: redhat-operators
         sourceNamespace: openshift-marketplace
-  when: 
-    - subscription_info.resources is defined
-    - subscription_info.resources | length == 0
 
+- name: Wait for ArgoCD object to exist
+  kubernetes.core.k8s_info:
+    api_version: argoproj.io/v1beta1
+    kind: ArgoCD
+    namespace: openshift-gitops
+    name: openshift-gitops
+  register: argocd_object
+  retries: 30
+  delay: 10
+  until: argocd_object.resources | length > 0
 
-# - name: Wait a few moments for the object to be created
-#   ansible.builtin.pause:
-#     seconds: 30
-  
-
+- name: Wait until ArgoCD object's status.phase is 'Available'
+  kubernetes.core.k8s_info:
+    api_version: argoproj.io/v1beta1
+    kind: ArgoCD
+    namespace: openshift-gitops
+    name: openshift-gitops
+  register: argocd_status
+  retries: 30
+  delay: 10
+  until: 
+    - argocd_status.resources[0].status.phase is defined
+    - argocd_status.resources[0].status.phase == 'Available'
+...
 

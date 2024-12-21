@@ -1,4 +1,5 @@
-- name: Ensure the OpenShift GitOps Operator subscription is created
+---
+- name: Ensure the Operator ArgoCD Application is present
   kubernetes.core.k8s:
     state: present
     definition:
@@ -23,12 +24,27 @@
           syncOptions:
             - CreateNamespace=true
 
-- name: Wait a few moments for the object to be created
-  ansible.builtin.pause:
-    seconds: 30
+- name: Wait for Operator ArgoCD Application to exist
+  kubernetes.core.k8s_info:
+    api_version: argoproj.io/v1alpha1
+    kind: Application
+    name: '{{ operators_iac_repo["name"] }}'
+    namespace: '{{ operators_iac_repo["namespace"] }}'
+  register: argocd_operator_object
+  retries: 30
+  delay: 10
+  until: argocd_operator_object.resources | length > 0
 
-- name: Include tasks that validate the operator is installed and 'Available'
-  ansible.builtin.include_tasks: validations/gitops.yaml
-  vars:
-    instance_name: '{{ operators_iac_repo["name"] }}'
-
+- name: Wait until Operator ArgoCD Application status.health.status is 'Healthy'
+  kubernetes.core.k8s_info:
+    api_version: argoproj.io/v1alpha1
+    kind: Application
+    name: '{{ operators_iac_repo["name"] }}'
+    namespace: '{{ operators_iac_repo["namespace"] }}'
+  register: argocd_operator_status
+  retries: 30
+  delay: 10
+  until: 
+    - argocd_operator_status.resources[0].status.health.status is defined
+    - argocd_operator_status.resources[0].status.health.status == 'Healthy'
+...
