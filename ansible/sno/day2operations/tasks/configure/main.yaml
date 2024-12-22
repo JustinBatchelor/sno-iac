@@ -1,23 +1,4 @@
 ---
-# - name: Task to patch argocd resource resource to reencrypt tls
-#   kubernetes.core.k8s:
-#     api_version: argoproj.io/v1beta1
-#     kind: ArgoCD
-#     name: openshift-gitops
-#     namespace: openshift-gitops
-#     state: patched
-#     merge_type:
-#       - strategic-merge
-#       - merge
-#     definition:
-#       spec:
-#         server:
-#           route:
-#             enabled: true
-#             tls:
-#               insecureEdgeTerminationPolicy: Redirect
-#               termination: reencrypt
-
 - name: Patch certmanagers.operator.openshift.io to support dns validation
   kubernetes.core.k8s:
     state: patched
@@ -104,9 +85,6 @@
   retries: 30
   delay: 10
   until: argocd_operator_instance_object.resources | length > 0
-
-- debug:
-    msg: "{{ argocd_operator_instance_object.resources[0].status.health }}"
 
 - name: Wait until Operator Instance ArgoCD Application status.health.status is 'Healthy'
   kubernetes.core.k8s_info:

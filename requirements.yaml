@@ -1,4 +1,8 @@
 collections:
-  - name: https://github.com/JustinBatchelor/ansible_collections.git#/justinbatchelor/redhat_assisted_installer
-    type: git
-    version: main
+# pulls from source repo
+  # - name: https://github.com/JustinBatchelor/ansible_collections.git#/justinbatchelor/redhat_assisted_installer
+  #   type: git
+  #   version: main
+
+  # pulls latest published collection from ansible galaxy
+  - name: justinbatchelor.redhat_assisted_installer

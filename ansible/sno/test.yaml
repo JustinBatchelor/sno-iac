@@ -1,5 +1,0 @@
-- name: Ansible playbook to configure various day2 operations
-  hosts: localhost
-  vars_files:
-    - vars.yaml
-  tasks:
